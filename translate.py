@@ -22,25 +22,27 @@ def findAllTranslateFiles(root_dir):
                 yield obj
 
 
-def do_translate(json_path, src_language, dest_language, key, content, translator):
+def do_translate(json_path, src_language, dest_language, contents, translator):
     # dict = NULL
     with open(json_path, 'r+') as load_from:
         dict = json.load(load_from)
-        if key in dict:
-            print('key exist, skip!!!')
-        elif dest_language == src_language:
-            print('same language, skip!!!')
-            dict[key] = content
-        else:
-            result = translator.translate(
-                content, dest=dest_language, src=src_language)
-            dict[key] = result.text
+        for content in contents:
+            print('key = ' + content['key'])
+            if content['key'] in dict:
+                print('key exist, skip!!!')
+            elif dest_language == src_language:
+                print('same language, skip!!!')
+                dict[content['key']] = content['content']
+            else:
+                result = translator.translate(
+                    content['content'], dest=dest_language, src=src_language)
+                dict[content['key']] = result.text
     with open(json_path, 'w+') as f:
         json.dump(dict, f, ensure_ascii=False)
     time.sleep(0.5)
 
 
-def do_translate_files(translate_files, src_language, key, content):
+def do_translate_files(translate_files, src_language, contents):
     translator = Translator()
     for translate_file in translate_files:
         print('path = ' + translate_file['path'])
@@ -48,7 +50,7 @@ def do_translate_files(translate_files, src_language, key, content):
         print('*'*20)
         # do translate by language
         do_translate(json_path=translate_file['path'], src_language=src_language,
-                     dest_language=translate_file['language'], key=key, content=content, translator=translator)
+                     dest_language=translate_file['language'], contents=contents, translator=translator)
 
 
 def run(project_path):
@@ -61,7 +63,8 @@ def run(project_path):
         # do translate
         with open('data.json', 'r') as load_from:
             dict = json.load(load_from)
-            do_translate_files(translate_files, dict['language'], dict['key'], dict['content'])
+            do_translate_files(
+                translate_files, dict['language'], dict['contents'])
     except Exception as e:
         print('cause expection!!')
         print(e)
