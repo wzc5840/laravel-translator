@@ -33,6 +33,9 @@ def do_translate(json_path, src_language, dest_language, contents, translator):
             elif dest_language == src_language:
                 print('same language, skip!!!')
                 dict[content['key']] = content['content']
+            elif dest_language in content:
+                print('Use the specified content. [' + dest_language + ']')
+                dict[content['key']] = content[dest_language]
             else:
                 result = translator.translate(
                     content['content'], dest=dest_language, src=src_language)
